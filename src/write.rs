@@ -107,16 +107,14 @@ impl Write<[u8]> for Event<'_> {
     fn write(self, output: &mut [u8]) -> Option<&[u8]> {
         match self {
             Event::Midi(evt) => evt.write(output),
-            // TODO support messages longer than 127 (using variable length quantities).
             Event::SysEx(msg) => unsafe {
-                if output.len() < msg.len() + 3 || msg.len() > i8::MAX as usize {
+                if output.len() < msg.len() + 2 {
                     return None;
                 }
                 *output.get_unchecked_mut(0) = 0xF0;
-                *output.get_unchecked_mut(1) = msg.len() as u8 + 1;
-                ptr::copy_nonoverlapping(msg.as_ptr(), output.as_mut_ptr().offset(2), msg.len());
-                *output.get_unchecked_mut(msg.len()) = 0xF7;
-                Some(unsafe_slice(output, 0, msg.len() + 3))
+                ptr::copy_nonoverlapping(msg.as_ptr(), output.as_mut_ptr().offset(1), msg.len());
+                *output.get_unchecked_mut(msg.len() + 1) = 0xF7;
+                Some(unsafe_slice(output, 0, msg.len() + 2))
             },
             // TODO support messages longer than 127 (using variable length quantities).
             Event::Escape(msg) => unsafe {

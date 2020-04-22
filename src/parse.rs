@@ -68,17 +68,17 @@ impl<'src> Parse<&'src [u8]> for Event<'src> {
             }
             0xF0 => match first & 0x0F {
                 0x00 => {
-                    let len = *input.get(2)? as usize;
-                    if input.len() == len + 2 {
-                        // (safety) We can't overflow isize::MAX because len comes from a u8.
-                        // we have to skip the bounds checks ourselves because the compiler can't
-                        // deduce that we already did the length check
-                        unsafe {
-                            let pointer = input.as_ptr().offset(2);
-                            Some(Event::SysEx(slice::from_raw_parts(pointer, len - 3)))
+                    let mut end_idx = 0;
+                    loop {
+                        match input.get(end_idx) {
+                            Some(0xF7) | None => break,
+                            _ => (),
                         }
-                    } else {
-                        None
+                        end_idx += 1;
+                    }
+                    unsafe {
+                        let pointer = input.as_ptr().offset(1);
+                        Some(Event::SysEx(slice::from_raw_parts(pointer, end_idx - 1)))
                     }
                 }
                 _ => None,
