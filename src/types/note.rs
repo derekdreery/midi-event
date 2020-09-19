@@ -3,6 +3,8 @@
 #[cfg(fuzzing)]
 use arbitrary::Arbitrary;
 use core::mem;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// A note representable in a 7 bit unsigned int. The subscript 's' to a note means sharp. The
 /// subscript 'n' to an octave means negate, so `Cs2n` = C# in octave -2.
@@ -15,6 +17,7 @@ use core::mem;
 #[repr(u8)]
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Hash)]
 #[cfg_attr(fuzzing, derive(Arbitrary))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Note {
     C1n = 0x00,
     Cs1n = 0x01,

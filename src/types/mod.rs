@@ -2,12 +2,15 @@ mod note;
 #[cfg(fuzzing)]
 use arbitrary::Arbitrary;
 pub use note::Note;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 // Events
 // ======
 
 /// All possible midi events
 #[derive(Debug, PartialEq, Copy, Clone, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Event<'src> {
     Midi(MidiEvent),
     SysEx(&'src [u8]),
@@ -21,6 +24,7 @@ pub enum Event<'src> {
 /// The midi event, along with the channel it applies to
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
 #[cfg_attr(fuzzing, derive(Arbitrary))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MidiEvent {
     /// The channel the midi event applies to
     pub channel: u8,
@@ -37,6 +41,7 @@ pub struct MidiEvent {
 /// for either u8 or i8. I use u8 here.
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
 #[cfg_attr(fuzzing, derive(Arbitrary))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum MidiEventType {
     /// Stop sounding the given note
     ///
